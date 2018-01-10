@@ -7,7 +7,6 @@
 #include "orbot_utils.h"
 
 ros::Subscriber sub;
-ros::NodeHandle nh;
 float dx,dy,dTheta;
 bool update;
 const float pi=3.14159265359;
@@ -29,6 +28,7 @@ void setupSerial(LibSerial::SerialStream *ser){
 }
 int main(int argc, char** argv){
 	ros::init(argc,argv,"orbot_client");
+	ros::NodeHandle nh;
 	sub=nh.subscribe("orbot_server/orbot_delta",1000,messageCallback);
 
 	update=true;
