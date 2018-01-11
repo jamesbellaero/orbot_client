@@ -40,6 +40,7 @@ int main(int argc, char** argv){
 	ser2.Open("/dev/ACM1");
 	setupSerial(&ser1);
 	setupSerial(&ser2);
+	ser1.write("!g 1 400\r",9);
 	int count=0;
 
 	ros::Rate loop_rate(10);
