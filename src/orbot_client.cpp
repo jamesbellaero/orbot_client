@@ -26,7 +26,7 @@ void messageCallback(geometry_msgs::Vector3 vec){
 int main(int argc, char** argv){
 	ros::init(argc,argv,"orbot_client");
 	ros::NodeHandle nh;
-	sub=nh.subscribe("orbot_server/orbot_delta",1000,messageCallback);
+	sub=nh.subscribe("/orbot_server/orbot_delta",1000,messageCallback);
 	
 	update=true;
 
@@ -34,12 +34,11 @@ int main(int argc, char** argv){
 	SerialPort ser1("/dev/ttyACM0");
 	ser1.Open();
 	ser1.SetBaudRate(SerialPort::BAUD_115200);
-	ser1.Write("!g 1 400\r");
 	
 	SerialPort ser2("/dev/ttyACM1");
 	ser2.Open();
 	ser2.SetBaudRate(SerialPort::BAUD_115200);
-	ser2.Write("!g 2 400\r");
+
 	ros::Rate loop_rate(10);
 	while(ros::ok()){
 		//convert delta positions to velocities somehow
@@ -99,6 +98,7 @@ int main(int argc, char** argv){
 		//	}
 			std::cout<<"Wrote all rates\n";
 		}
+		ros::spinOnce();
 		loop_rate.sleep();
 		
 	}
