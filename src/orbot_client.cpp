@@ -1,9 +1,13 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Vector3.h>
 
+#include <iostream>
+#include <unistd.h>
+#include <cstdlib>
 #include <math.h>
 #include <stdio.h>
 #include <SerialStream.h>//to install, use sudo apt-get install libserial-dev
+#include <SerialPort.h>
 #include "orbot_utils.h"
 
 ros::Subscriber sub;
@@ -24,7 +28,7 @@ void setupSerial(LibSerial::SerialStream *ser){
 	ser->SetCharSize(SerialStreamBuf::CHAR_SIZE_8);
 	ser->SetNumOfStopBits(1);
 	ser->SetParity(SerialStreamBuf::PARITY_NONE);
-	ser->SetFlowControl(SerialStreamBuf::FLOW_CONTROL_HARD);
+	ser->SetFlowControl(SerialStreamBuf::FLOW_CONTROL_NONE);
 }
 int main(int argc, char** argv){
 	ros::init(argc,argv,"orbot_client");
@@ -34,18 +38,23 @@ int main(int argc, char** argv){
 	update=true;
 
 	using namespace LibSerial;
-	SerialStream ser1;
-	ser1.Open("/dev/ACM0");//may be incorrect ports
+	SerialPort ser1("/dev/ttyACM0");
+	ser1.Open();//may be incorrect ports
 	SerialStream ser2;
-	ser2.Open("/dev/ACM1");
-	setupSerial(&ser1);
-	setupSerial(&ser2);
+	ser2.Open("/dev/ttyACM1");
+//	setupSerial(&ser1);
+//	setupSerial(&ser2);
+	ser1.SetBaudRate(SerialPort::BAUD_115200);
+		
 	int count=0;
-
+	ser1.Write("!g 1 400\r");
 	ros::Rate loop_rate(10);
 	while(ros::ok()){
 		//convert delta positions to velocities somehow
 		//divide all by 2 for right now
+		
+	
+
 		if(update){
 			update=false;
 			if(abs(dx)>vMax/2)
@@ -69,9 +78,9 @@ int main(int argc, char** argv){
 			char output_buffer[256];
 			int len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[0]);
 			std::cout<<len;
-			ser1.write(output_buffer,len);
+			ser1.Write(output_buffer);
 			len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[1]);
-			ser1.write(output_buffer,len);
+			ser1.Write(output_buffer);
 			len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[2]);
 			ser2.write(output_buffer,len);
 			len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[3]);
