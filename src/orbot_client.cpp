@@ -40,12 +40,12 @@ int main(int argc, char** argv){
 	using namespace LibSerial;
 	SerialPort ser1("/dev/ttyACM0");
 	ser1.Open();//may be incorrect ports
-	SerialStream ser2;
-	ser2.Open("/dev/ttyACM1");
+	SerialPort ser2("/dev/ttyACM1");
+	ser2.Open();
 //	setupSerial(&ser1);
 //	setupSerial(&ser2);
 	ser1.SetBaudRate(SerialPort::BAUD_115200);
-		
+	ser2.SetBaudRate(SerialPort::BAUD_115200);
 	int count=0;
 	ser1.Write("!g 1 400\r");
 	ros::Rate loop_rate(10);
@@ -75,16 +75,31 @@ int main(int argc, char** argv){
 				rates[i]=round(rates[i]/122*1000);
 			}
 			std::cout<<count++;
-			char output_buffer[256];
+			char output_buffer[64];
 			int len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[0]);
-			std::cout<<len;
-			ser1.Write(output_buffer);
+			char* write =(char*) malloc(len+1);
+			strncpy(write,output_buffer,len);
+			ser1.Write(write);
+
 			len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[1]);
-			ser1.Write(output_buffer);
+			write =(char*) malloc(len+1);
+			strncpy(write,output_buffer,len);
+			ser1.Write(write);
+
 			len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[2]);
-			ser2.write(output_buffer,len);
+			write =(char*) malloc(len+1);
+			strncpy(write,output_buffer,len);
+			ser2.write(write);
+
 			len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[3]);
-			ser2.write(output_buffer,len);
+			write =(char*) malloc(len+1);
+			strncpy(write,output_buffer,len);
+			ser2.write(write);
+
+			for(int i=0;i<4;i++){
+				std::cout<<rates[i]<<"\n"
+			}
+			std::cout<<"Wrote all rates";
 		}
 		loop_rate.sleep();
 		
