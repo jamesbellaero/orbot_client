@@ -46,22 +46,21 @@ int main(int argc, char** argv){
 		//divide all by 2 for right now	
 		if(update){
 			update=false;
-			std::cout<<"Updating orbot\n";
+			std::cout<<"Updating orbot\n";//TODO: preserve ratios
 			if(abs(dx)>vMax/2)
 				dx=(dx>0?1:-1)*vMax/2;
 			if(abs(dy)>vMax/2)
 				dy=(dy>0?1:-1)*vMax/2;
 			if(abs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
 				dTheta=(dTheta>0?1:-1)*vMax/.04;
-
 			getRotationRates(rates,dx,dy,dTheta);
 
 			for(int i=0;i<4;i++){
 				rates[i]=rates[i]/pi/2*60;
-				if(rates[i]>122)
-					rates[i]=122;
-				if(rates[i]<-122)
-					rates[i]=-122;
+				if(rates[i]>120)
+					rates[i]=120;
+				if(rates[i]<-120)
+					rates[i]=-120;
 				rates[i]=round(rates[i]/122*1000);
 			}
 		}
@@ -71,28 +70,28 @@ int main(int argc, char** argv){
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
 		ser1.Write(write);
-//		std::cout<<"wrote "<<write<<"\n";
+		std::cout<<"wrote "<<write<<"\n";
 			
 		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[1]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
 		ser1.Write(write);
-//		std::cout<<"wrote "<<write<<"\n";
+		std::cout<<"wrote "<<write<<"\n";
 
 		len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[2]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
 		ser2.Write(write);
-//		std::cout<<"wrote "<<write<<"\n";
+		std::cout<<"wrote "<<write<<"\n";
 
 		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[3]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		ser2.Write(write);
 		write[len]='\0';
-//		std::cout<<"wrote "<<write<<"\n";
+		std::cout<<"wrote "<<write<<"\n";
 	//	for(int i=0;i<4;i++){
 	//		std::cout<<rates[i]<<"\n";
 	//	}
