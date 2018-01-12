@@ -62,7 +62,6 @@ int main(int argc, char** argv){
 					rates[i]=122;
 				if(rates[i]<-122)
 					rates[i]=-122;
-				rates[i]=round(rates[i]/122*1000);
 			}
 
 			char output_buffer[64];
