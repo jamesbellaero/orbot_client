@@ -39,7 +39,8 @@ int main(int argc, char** argv){
 	ser2.Open();
 	ser2.SetBaudRate(SerialPort::BAUD_115200);
 
-	ros::Rate loop_rate(10);
+	ros::Rate loop_rate(2);//TODO: spiit up the updating and writing rates with time class
+	float rates[4];
 	while(ros::ok()){
 		//convert delta positions to velocities somehow
 		//divide all by 2 for right now	
@@ -47,13 +48,12 @@ int main(int argc, char** argv){
 			update=false;
 			std::cout<<"Updating orbot\n";
 			if(abs(dx)>vMax/2)
-				dx=vMax/2;
+				dx=(dx>0?1:-1)*vMax/2;
 			if(abs(dy)>vMax/2)
-				dy=vMax/2;
+				dy=(dy>0?1:-1)*vMax/2;
 			if(abs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
-				dTheta=vMax/.04;
+				dTheta=(dTheta>0?1:-1)*vMax/.04;
 
-			float rates[4];
 			getRotationRates(rates,dx,dy,dTheta);
 
 			for(int i=0;i<4;i++){
@@ -62,44 +62,45 @@ int main(int argc, char** argv){
 					rates[i]=122;
 				if(rates[i]<-122)
 					rates[i]=-122;
+				rates[i]=round(rates[i]/122*1000);
 			}
-
-			char output_buffer[64];
-			int len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[0]);
-			char* write =(char*) malloc(len+1);
-			strncpy(write,output_buffer,len);
-			write[len]='\0';
-			ser1.Write(write);
-			std::cout<<"wrote "<<write<<"\n";
-			
-			len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[1]);
-			write =(char*) malloc(len+1);
-			strncpy(write,output_buffer,len);
-			write[len]='\0';
-			ser1.Write(write);
-			std::cout<<"wrote "<<write<<"\n";
-
-			len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[2]);
-			write =(char*) malloc(len+1);
-			strncpy(write,output_buffer,len);
-			write[len]='\0';
-			ser2.Write(write);
-			std::cout<<"wrote "<<write<<"\n";
-
-			len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[3]);
-			write =(char*) malloc(len+1);
-			strncpy(write,output_buffer,len);
-			ser2.Write(write);
-			write[len]='\0';
-			std::cout<<"wrote "<<write<<"\n";
-		//	for(int i=0;i<4;i++){
-		//		std::cout<<rates[i]<<"\n";
-		//	}
-			std::cout<<"Wrote all rates\n";
 		}
-		ros::spinOnce();
-		loop_rate.sleep();
+		char output_buffer[64];
+		int len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[0]);
+		char* write =(char*) malloc(len+1);
+		strncpy(write,output_buffer,len);
+		write[len]='\0';
+		ser1.Write(write);
+//		std::cout<<"wrote "<<write<<"\n";
+			
+		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[1]);
+		write =(char*) malloc(len+1);
+		strncpy(write,output_buffer,len);
+		write[len]='\0';
+		ser1.Write(write);
+//		std::cout<<"wrote "<<write<<"\n";
+
+		len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[2]);
+		write =(char*) malloc(len+1);
+		strncpy(write,output_buffer,len);
+		write[len]='\0';
+		ser2.Write(write);
+//		std::cout<<"wrote "<<write<<"\n";
+
+		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[3]);
+		write =(char*) malloc(len+1);
+		strncpy(write,output_buffer,len);
+		ser2.Write(write);
+		write[len]='\0';
+//		std::cout<<"wrote "<<write<<"\n";
+	//	for(int i=0;i<4;i++){
+	//		std::cout<<rates[i]<<"\n";
+	//	}
+//		std::cout<<"Wrote all rates\n";
 		
+//		loop_rate.sleep();
+		ros::spinOnce();
+		loop_rate.sleep();		
 	}
 	ser1.Close();
 	ser2.Close();
