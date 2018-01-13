@@ -39,7 +39,7 @@ int main(int argc, char** argv){
 	ser2.Open();
 	ser2.SetBaudRate(SerialPort::BAUD_115200);
 
-	ros::Rate loop_rate(2);//TODO: spiit up the updating and writing rates with time class
+	ros::Rate loop_rate(10);//TODO: spiit up the updating and writing rates with time class
 	float rates[4];
 	while(ros::ok()){
 		//convert delta positions to velocities somehow
@@ -92,11 +92,6 @@ int main(int argc, char** argv){
 		ser2.Write(write);
 		write[len]='\0';
 		std::cout<<"wrote "<<write<<"\n";
-	//	for(int i=0;i<4;i++){
-	//		std::cout<<rates[i]<<"\n";
-	//	}
-//		std::cout<<"Wrote all rates\n";
-		
 //		loop_rate.sleep();
 		ros::spinOnce();
 		loop_rate.sleep();		
