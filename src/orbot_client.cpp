@@ -17,7 +17,7 @@ const float pi=3.14159265359;
 const float wMax=122*2*pi/60;
 const float vMax=.00762*wMax/1.424;// m/s
 void messageCallback(geometry_msgs::Vector3 vec){
-	ROS_INFO("A Callback!!!");
+	ROS_INFO("A Callback!!!: %f\t%f\t%f",vec.x,vec.y,vec.z);
 	dx=vec.x;
 	dy=vec.y;
 	dTheta=vec.z;
