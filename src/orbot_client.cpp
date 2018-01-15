@@ -1,32 +1,80 @@
+/*
+DESCRIPTION: 
+
+FUNCTIONS:
+void 	messageCallbackVicon(geometry_msgs::TransformStamped)
+	Subscribes to the orbot object on vicon at /vicon/orbot/orbot and assigns the pose to loc and att
+void	messageCallbackTarget(geometry_msgs::TransformStamped)
+	Subscribes to the target on /orbot_server/target and assigns the target pose to tarLoc and tarAtt
+int 	main(int, char**)
+	Starts the subscribers and publisher, publishes delta between target and current pose to the /orbot_server/orbot_delta
+
+NOTES:
+	Would like to move this functionality into the orbot client eventually, since the client should be able to subscribe
+	to both on its own. Only currently using this for debugging/separation of tasks
+
+Last edited by James Bell on 1/9/18
+*/
 #include <ros/ros.h>
 #include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/TransformStamped.h>
+#include "quaternion.h"
 
 #include <iostream>
 #include <unistd.h>
 #include <cstdlib>
 #include <math.h>
 #include <stdio.h>
-#include <SerialStream.h>//to install, use sudo apt-get install libserial-dev
-#include <SerialPort.h>
+#include <SerialPort.h>//to install, use sudo apt-get install libserial-dev
 #include "orbot_utils.h"
 
-ros::Subscriber sub;
-float dx,dy,dTheta;
+ros::Subscriber viconSub,targetSub;
 bool update;
 const float pi=3.14159265359;
 const float wMax=122*2*pi/60;
 const float vMax=.00762*wMax/1.424;// m/s
-void messageCallback(geometry_msgs::Vector3 vec){
-	ROS_INFO("A Callback!!!: %f\t%f\t%f",vec.x,vec.y,vec.z);
-	dx=vec.x;
-	dy=vec.y;
-	dTheta=vec.z;
-	update=true;
+
+
+
+Vec3 tarLoc;
+Vec3 tarAtt;
+Vec3 loc;
+Vec3 att;	
+void messageCallbackVicon( geometry_msgs::TransformStamped t){
+  std::string a =  t.header.frame_id;//currently unused
+  //defined in quaternion.h		
+  Vec4 quat;
+  loc.v[0] = t.transform.translation.x;
+  loc.v[1] = t.transform.translation.y;
+  loc.v[2] = t.transform.translation.z;
+  quat.v[0] = t.transform.rotation.w;
+  quat.v[1] = t.transform.rotation.x;
+  quat.v[2] = t.transform.rotation.y;
+  quat.v[3] = t.transform.rotation.z;
+  att = Quat2RPY(quat);
+  if(!update)
+  	update=true;
 }
+void messageCallbackTarget( geometry_msgs::TransformStamped t){
+	std::string a =  t.header.frame_id;//currently unused
+  Vec4 quat;
+	tarLoc.v[0] = t.transform.translation.x;
+	tarLoc.v[1] = t.transform.translation.y;
+	tarLoc.v[2] = t.transform.translation.z;
+	quat.v[0] = t.transform.rotation.w;
+	quat.v[1] = t.transform.rotation.x;
+	quat.v[2] = t.transform.rotation.y;
+	quat.v[3] = t.transform.rotation.z;
+	tarAtt = Quat2RPY(quat);
+	if(!update)
+		update=true;
+}
+
 int main(int argc, char** argv){
 	ros::init(argc,argv,"orbot_client");
 	ros::NodeHandle nh;
-	sub=nh.subscribe("/orbot_server/orbot_delta",1000,messageCallback);
+	viconSub=nh.subscribe("/vicon/orbot/orbot",1000,messageCallbackVicon);
+	targetSub=nh.subscribe("/orbot_client/target",1000,messageCallbackTarget);
 	
 	update=true;
 
@@ -41,12 +89,21 @@ int main(int argc, char** argv){
 
 	ros::Rate loop_rate(10);//TODO: spiit up the updating and writing rates with time class
 	float rates[4];
+	float dx,dy,dTheta;
 	while(ros::ok()){
 		//convert delta positions to velocities somehow
 		//divide all by 2 for right now	
 		if(update){
 			update=false;
 			std::cout<<"Updating orbot\n";//TODO: preserve ratios
+
+			float dx0 = (float)(tarLoc.v[0] - loc.v[0]);
+	 	  float dy0 = (float)(tarLoc.v[1] - loc.v[1]);
+	 	  dTheta  = (float)(tarAtt.v[2] - att.v[2]);
+
+	 	  dx=dx0*cos(dTheta)-dy0*sin(dTheta);
+	 	  dy=dx0*sin(dTheta)+dy0*cos(dTheta);
+
 			if(abs(dx)>vMax/2)
 				dx=(dx>0?1:-1)*vMax/2;
 			if(abs(dy)>vMax/2)
