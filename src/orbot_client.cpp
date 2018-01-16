@@ -78,7 +78,6 @@ int main(int argc, char** argv){
 	
 	update=true;
 
-	using namespace LibSerial;
 	SerialPort ser1("/dev/ttyACM0");
 	ser1.Open();
 	ser1.SetBaudRate(SerialPort::BAUD_115200);
@@ -121,6 +120,7 @@ int main(int argc, char** argv){
 				rates[i]=round(rates[i]/122*1000);
 			}
 		}
+		std::cout<<"Deltas are: "<<dx<<"\t"<<dy<<"\t"<<dTheta<<"\n";
 		char output_buffer[64];
 		int len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[0]);
 		char* write =(char*) malloc(len+1);
