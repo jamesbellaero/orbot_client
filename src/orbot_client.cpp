@@ -107,11 +107,11 @@ int main(int argc, char** argv){
 	 	  vx=dx;
 	 	  vy=dy;
 	 	  vTheta=dTheta;
-			if(abs(dx)>vMax/2)
-				vx=(dx>0?1:-1)*vMax/2*(abs(dy)>abs(dx)?abs(dx/dy):1);
-			if(abs(dy)>vMax/2)
-				vy=(dy>0?1:-1)*vMax/2*(abs(dx)>abs(dy)?abs(dy/dx):1);
-			if(abs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
+			if(fabs(dx)>vMax/2)
+				vx=(dx>0?1:-1)*vMax/2*(fabs(dy)>fabs(dx)?fabs(dx/dy):1);
+			if(fabs(dy)>vMax/2)
+				vy=(dy>0?1:-1)*vMax/2*(fabs(dx)>fabs(dy)?fabs(dy/dx):1);
+			if(fabs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
 				vTheta=0;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
 			getRotationRates(rates,vx,vy,vTheta);
 
