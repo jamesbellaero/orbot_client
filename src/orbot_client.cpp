@@ -70,6 +70,19 @@ void messageCallbackTarget( geometry_msgs::TransformStamped t){
 		update=true;
 }
 
+void writeToPort(SerialPort ser, char* write){
+	bool written=false;
+	while(!written){
+		try{
+			ser.Write(write);
+			written=true;
+		}
+		catch(std::exception& e){
+			continue();
+		}
+	}
+}
+
 int main(int argc, char** argv){
 	ros::init(argc,argv,"orbot_client");
 	ros::NodeHandle nh;
@@ -94,7 +107,7 @@ int main(int argc, char** argv){
 		//divide all by 2 for right now	
 		if(update){
 			update=false;
-			std::cout<<"Updating orbot\n";//TODO: preserve ratios
+			std::cout<<"Updating orbot\n";
 
 			float dx0 = (float)(tarLoc.v[0] - loc.v[0]);
 	 	  float dy0 = (float)(tarLoc.v[1] - loc.v[1]);
@@ -125,32 +138,33 @@ int main(int argc, char** argv){
 			}
 		}
 		std::cout<<"Deltas are: "<<dx<<"\t"<<dy<<"\t"<<dTheta<<"\n";
+		//TODO: make this more straightforward
 		char output_buffer[64];
 		int len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[0]);
 		char* write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
-		ser1.Write(write);
+		writeToPort(ser1,write);
 		std::cout<<"wrote "<<write<<"\n";
 			
 		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[1]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
-		ser1.Write(write);
+		writeToPort(ser1,write);
 		std::cout<<"wrote "<<write<<"\n";
 
 		len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[2]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
-		ser2.Write(write);
+		writeToPort(ser1,write);
 		std::cout<<"wrote "<<write<<"\n";
 
 		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[3]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
-		ser2.Write(write);
+		writeToPort(ser1,write);
 		write[len]='\0';
 		std::cout<<"wrote "<<write<<"\n";
 //		loop_rate.sleep();
