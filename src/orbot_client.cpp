@@ -103,13 +103,17 @@ int main(int argc, char** argv){
 	 	  dx=dx0*cos(dTheta)-dy0*sin(dTheta);
 	 	  dy=dx0*sin(dTheta)+dy0*cos(dTheta);
 
+	 	  float vx,vy,vTheta;
+	 	  vx=dx;
+	 	  vy=dy;
+	 	  vTheta=dTheta;
 			if(abs(dx)>vMax/2)
-				dx=(dx>0?1:-1)*vMax/2*(abs(dy)>abs(dx)?abs(dx/dy):1);
+				vx=(dx>0?1:-1)*vMax/2*(abs(dy)>abs(dx)?abs(dx/dy):1);
 			if(abs(dy)>vMax/2)
-				dy=(dy>0?1:-1)*vMax/2*(abs(dx)>abs(dy)?abs(dy/dx):1);
+				vy=(dy>0?1:-1)*vMax/2*(abs(dx)>abs(dy)?abs(dy/dx):1);
 			if(abs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
-				dTheta=0;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
-			getRotationRates(rates,dx,dy,dTheta);
+				vTheta=0;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
+			getRotationRates(rates,vx,vy,vTheta);
 
 			for(int i=0;i<4;i++){
 				rates[i]=rates[i]/pi/2*60;
