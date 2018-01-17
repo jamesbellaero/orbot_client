@@ -131,11 +131,11 @@ int main(int argc, char** argv){
 
 	 	  float vx,vy,vTheta;
 	 	  //pid stuff here
-	 	  vx=P*dx + I*errorIntX +  D*(dx-errorLastX);
+	 	  vx=P*dx ;//+ I*errorIntX +  D*(dx-errorLastX);
 			errorIntX+=dx;
 			errorLastX = dx;
 
-	 	  vy=P*dy + I*errorIntY + D*(dy-errorLastY);
+	 	  vy=P*dy ;//+ I*errorIntY + D*(dy-errorLastY);
 			errorIntY+=dy;
 			errorLastY = dy;
 
