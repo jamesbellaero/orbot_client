@@ -123,7 +123,7 @@ int main(int argc, char** argv){
 
 	 	  dx=dx0*cos(dTheta)-dy0*sin(dTheta);
 	 	  dy=dx0*sin(dTheta)+dy0*cos(dTheta);
-
+			 
 	 	  if(firstIter && fabs(dx)>.00001){
 				errorLastX=dx;
 				errorLastY=dy;
@@ -147,7 +147,12 @@ int main(int argc, char** argv){
 				float vy0=vy;
 				vx=vx0/sqrt(pow(vx0,2)+pow(vy0,2))*vMax/2;
 				vy=vy0/sqrt(pow(vx0,2)+pow(vy0,2))*vMax/2;
-				
+					
+			}
+			if(sqrt(pow(vx,2)+pow(vy,2))<.01){
+				vx=0;
+				vy=0;
+				vTheta=0;
 			}
 			// if(fabs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
 			// 	vTheta=0;//P*dTheta;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
