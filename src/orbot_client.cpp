@@ -139,7 +139,7 @@ int main(int argc, char** argv){
 				errorLastY = dy;
 			}
 			if(fabs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
-				vTheta=0;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
+				vTheta=P*dTheta;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
 			getRotationRates(rates,vx,vy,vTheta);
 
 			for(int i=0;i<4;i++){
