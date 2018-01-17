@@ -76,6 +76,7 @@ void messageCallbackTarget( geometry_msgs::TransformStamped t){
 		update=true;
 }
 
+
 void writeToPort(SerialPort *ser, char* write){
 	bool written=false;
 	while(!written){
@@ -113,7 +114,7 @@ int main(int argc, char** argv){
 		//divide all by 2 for right now	
 		if(update){
 			update=false;
-			std::cout<<"Updating orbot\n";
+			std::cout<<"Updating orbot\n";//TODO: preserve ratios
 
 
 			float dx0 = (float)(tarLoc.v[0] - loc.v[0]);
@@ -162,7 +163,6 @@ int main(int argc, char** argv){
 			}
 		}
 		std::cout<<"Deltas are: "<<dx<<"\t"<<dy<<"\t"<<dTheta<<"\n";
-		//TODO: make this more straightforward
 		char output_buffer[64];
 		int len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[0]);
 		char* write =(char*) malloc(len+1);
