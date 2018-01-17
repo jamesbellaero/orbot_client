@@ -135,7 +135,7 @@ int main(int argc, char** argv){
 			errorIntX+=dx;
 			errorLastX = dx;
 
-	 	  vy=P*dy ;//+ I*errorIntY + D*(dy-errorLastY);
+	 	  vy=-P*dy ;//+ I*errorIntY + D*(dy-errorLastY);
 			errorIntY+=dy;
 			errorLastY = dy;
 
