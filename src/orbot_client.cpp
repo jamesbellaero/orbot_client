@@ -94,7 +94,7 @@ int main(int argc, char** argv){
 	ros::NodeHandle nh;
 	viconSub=nh.subscribe("/vicon/orbot/orbot",1000,messageCallbackVicon);
 	targetSub=nh.subscribe("/orbot_client/target",1000,messageCallbackTarget);
-	
+	bool firstIter=true;
 	update=true;
 
 	SerialPort ser1("/dev/ttyACM0");
@@ -115,6 +115,7 @@ int main(int argc, char** argv){
 			update=false;
 			std::cout<<"Updating orbot\n";
 
+
 			float dx0 = (float)(tarLoc.v[0] - loc.v[0]);
 	 	  float dy0 = (float)(tarLoc.v[1] - loc.v[1]);
 	 	  dTheta  = (float)(tarAtt.v[2] - att.v[2]);
@@ -122,24 +123,32 @@ int main(int argc, char** argv){
 	 	  dx=dx0*cos(dTheta)-dy0*sin(dTheta);
 	 	  dy=dx0*sin(dTheta)+dy0*cos(dTheta);
 
+	 	  if(firstIter){
+				errorLastX=dx;
+				errorLastY=dy;
+				firstIter=false;
+			}
+
 	 	  float vx,vy,vTheta;
 	 	  vx=dx;
 	 	  vy=dy;
 	 	  vTheta=dTheta;
 			if(fabs(dx)>vMax/2){
 				//vx=(dx>0?1:-1)*vMax/2*(fabs(dy)>fabs(dx)?fabs(dx/dy):1);
-				errorIntX+=dx;
+				
 				vx=P*dx + I*errorIntX +  D*(dx-errorLastX);
+				errorIntX+=dx;
 				errorLastX = dx;
 			}
 			if(fabs(dy)>vMax/2){
 				//vy=(dy>0?1:-1)*vMax/2*(fabs(dx)>fabs(dy)?fabs(dy/dx):1);
-				errorIntY+=dy;
+				
 				vy=P*dy + I*errorIntY + D*(dy-errorLastY);
+				errorIntY+=dy;
 				errorLastY = dy;
 			}
 			if(fabs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
-				vTheta=P*dTheta;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
+				vTheta=0;//P*dTheta;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
 			getRotationRates(rates,vx,vy,vTheta);
 
 			for(int i=0;i<4;i++){
