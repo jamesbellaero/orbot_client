@@ -144,8 +144,8 @@ int main(int argc, char** argv){
 				//vx=(dx>0?1:-1)*vMax/2*(fabs(dy)>fabs(dx)?fabs(dx/dy):1);
 				float vx0=vx;
 				float vy0=vy;
-				vx=vx0/sqrt(pow(vx,2)+pow(vy,2));
-				vy=vy0/sqrt(pow(vx,2)+pow(vy,2));
+				vx=vx0/sqrt(pow(vx,2)+pow(vy,2))*vMax/2;
+				vy=vy0/sqrt(pow(vx,2)+pow(vy,2))*vMax/2;
 				
 			}
 			// if(fabs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
