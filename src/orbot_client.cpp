@@ -33,7 +33,7 @@ bool update;
 const float pi=3.14159265359;
 const float wMax=122*2*pi/60;
 const float vMax=.00762*wMax/1.424;// m/s
-const float P=2;
+const float P=.25;
 const float I=0.2;
 const float D=1;
 int iteration;
@@ -76,12 +76,26 @@ void messageCallbackTarget( geometry_msgs::TransformStamped t){
 		update=true;
 }
 
+
+void writeToPort(SerialPort *ser, char* write){
+	bool written=false;
+	while(!written){
+		try{
+			ser->Write(write);
+			written=true;
+		}
+		catch(std::exception& e){
+			continue;
+		}
+	}
+}
+
 int main(int argc, char** argv){
 	ros::init(argc,argv,"orbot_client");
 	ros::NodeHandle nh;
 	viconSub=nh.subscribe("/vicon/orbot/orbot",1000,messageCallbackVicon);
 	targetSub=nh.subscribe("/orbot_client/target",1000,messageCallbackTarget);
-	
+	bool firstIter=true;
 	update=true;
 
 	SerialPort ser1("/dev/ttyACM0");
@@ -102,6 +116,7 @@ int main(int argc, char** argv){
 			update=false;
 			std::cout<<"Updating orbot\n";//TODO: preserve ratios
 
+
 			float dx0 = (float)(tarLoc.v[0] - loc.v[0]);
 	 	  float dy0 = (float)(tarLoc.v[1] - loc.v[1]);
 	 	  dTheta  = (float)(tarAtt.v[2] - att.v[2]);
@@ -109,24 +124,33 @@ int main(int argc, char** argv){
 	 	  dx=dx0*cos(dTheta)-dy0*sin(dTheta);
 	 	  dy=dx0*sin(dTheta)+dy0*cos(dTheta);
 
+	 	  if(firstIter && fabs(dx)>.00001){
+				errorLastX=dx;
+				errorLastY=dy;
+				firstIter=false;
+			}
+
 	 	  float vx,vy,vTheta;
-	 	  vx=dx;
-	 	  vy=dy;
-	 	  vTheta=dTheta;
-			if(fabs(dx)>vMax/2){
+	 	  //pid stuff here
+	 	  vx=P*dx ;//+ I*errorIntX +  D*(dx-errorLastX);
+			errorIntX+=dx;
+			errorLastX = dx;
+
+	 	  vy=-P*dy ;//+ I*errorIntY + D*(dy-errorLastY);
+			errorIntY+=dy;
+			errorLastY = dy;
+
+	 	  vTheta=0;//dTheta
+			if(sqrt(pow(vx,2)+pow(vy,2))>vMax/2){
 				//vx=(dx>0?1:-1)*vMax/2*(fabs(dy)>fabs(dx)?fabs(dx/dy):1);
-				errorIntX+=dx;
-				vx=P*dx + I*errorIntX +  D*(dx-errorLastX);
-				errorLastX = dx;
+				float vx0=vx;
+				float vy0=vy;
+				vx=vx0/sqrt(pow(vx0,2)+pow(vy0,2))*vMax/2;
+				vy=vy0/sqrt(pow(vx0,2)+pow(vy0,2))*vMax/2;
+				
 			}
-			if(fabs(dy)>vMax/2){
-				//vy=(dy>0?1:-1)*vMax/2*(fabs(dx)>fabs(dy)?fabs(dy/dx):1);
-				errorIntY+=dy;
-				vy=P*dy + I*errorIntY + D*(dy-errorLastY);
-				errorLastY = dy;
-			}
-			if(fabs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
-				vTheta=P*dTheta;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
+			// if(fabs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
+			// 	vTheta=0;//P*dTheta;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
 			getRotationRates(rates,vx,vy,vTheta);
 
 			for(int i=0;i<4;i++){
@@ -144,27 +168,27 @@ int main(int argc, char** argv){
 		char* write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
-		ser1.Write(write);
+		writeToPort(&ser1,write);
 		std::cout<<"wrote "<<write<<"\n";
 			
 		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[1]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
-		ser1.Write(write);
+		writeToPort(&ser1,write);
 		std::cout<<"wrote "<<write<<"\n";
 
 		len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[2]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
-		ser2.Write(write);
+		writeToPort(&ser2,write);
 		std::cout<<"wrote "<<write<<"\n";
 
 		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[3]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
-		ser2.Write(write);
+		writeToPort(&ser2,write);
 		write[len]='\0';
 		std::cout<<"wrote "<<write<<"\n";
 //		loop_rate.sleep();
