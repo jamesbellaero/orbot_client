@@ -140,7 +140,7 @@ int main(int argc, char** argv){
 			errorLastY = dy;
 
 	 	  vTheta=0;//dTheta
-			if(sqrt(pow(vx,2)+pow(vy,2))){
+			if(sqrt(pow(vx,2)+pow(vy,2))>vMax/2){
 				//vx=(dx>0?1:-1)*vMax/2*(fabs(dy)>fabs(dx)?fabs(dx/dy):1);
 				float vx0=vx;
 				float vy0=vy;
@@ -182,13 +182,13 @@ int main(int argc, char** argv){
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
-		writeToPort(&ser1,write);
+		writeToPort(&ser2,write);
 		std::cout<<"wrote "<<write<<"\n";
 
 		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[3]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
-		writeToPort(&ser1,write);
+		writeToPort(&ser2,write);
 		write[len]='\0';
 		std::cout<<"wrote "<<write<<"\n";
 //		loop_rate.sleep();
