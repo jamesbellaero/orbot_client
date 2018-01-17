@@ -30,22 +30,22 @@ Last edited by James Bell on 1/9/18
 
 ros::Subscriber viconSub,targetSub;
 bool update;
+//constants for PID's, etc
 const float pi=3.14159265359;
 const float wMax=122*2*pi/60;
 const float vMax=.00762*wMax/1.424;// m/s
 const float P=.25;
 const float I=0.2;
 const float D=1;
-int iteration;
-float errorIntX =0.0;
-float errorLastX = 0.0;
-float errorIntY =0.0;
-float errorLastY = 0.0;
+const float minDelta=.01;//minimum distance before moving
+
+float errorIntX,errorLastX,errorIntY,errorLastY;
 
 Vec3 tarLoc;
 Vec3 tarAtt;
 Vec3 loc;
 Vec3 att;	
+
 void messageCallbackVicon( geometry_msgs::TransformStamped t){
   std::string a =  t.header.frame_id;//currently unused
   //defined in quaternion.h		
@@ -115,11 +115,11 @@ int main(int argc, char** argv){
 			update=false;
 			std::cout<<"Updating orbot\n";
 
-
+			//determine delta
 			float dx0 = (float)(tarLoc.v[0] - loc.v[0]);
 	 	  float dy0 = (float)(tarLoc.v[1] - loc.v[1]);
 	 	  dTheta  = (float)(tarAtt.v[2] - att.v[2]);
-
+	 	  //rotate from global to local reference
 	 	  dx=dx0*cos(dTheta)-dy0*sin(dTheta);
 	 	  dy=dx0*sin(dTheta)+dy0*cos(dTheta);
 
@@ -131,7 +131,7 @@ int main(int argc, char** argv){
 
 	 	  float vx,vy,vTheta;
 	 	  //pid stuff here
-	 	  vx=P*dx ;//+ I*errorIntX +  D*(dx-errorLastX);
+	 	  vx=P*dx;//+ I*errorIntX +  D*(dx-errorLastX);
 			errorIntX+=dx;
 			errorLastX = dx;
 
@@ -139,17 +139,20 @@ int main(int argc, char** argv){
 			errorIntY+=dy;
 			errorLastY = dy;
 
-	 	  vTheta=0;//dTheta
-			if(sqrt(pow(vx,2)+pow(vy,2))>vMax/2){
-				//vx=(dx>0?1:-1)*vMax/2*(fabs(dy)>fabs(dx)?fabs(dx/dy):1);
-				float vx0=vx;
-				float vy0=vy;
-				vx=vx0/sqrt(pow(vx0,2)+pow(vy0,2))*vMax/2;
-				vy=vy0/sqrt(pow(vx0,2)+pow(vy0,2))*vMax/2;
-				
+	 	  float wTheta=P*dTheta;//dTheta
+	 	  vTheta=wTheta*.04;
+	 	  float vTotal=sqrt(pow(vx,2)+pow(vy,2)+pow(vTheta,2));
+			if(vTotal>vMax/1.5){//normalize by maximum velocity
+				vx*=vMax/1.5/vTotal;
+				vy*=vMax/1.5/vTotal;
+				vTheta*=vMax/1.5/vTotal;
 			}
-			// if(fabs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
-			// 	vTheta=0;//P*dTheta;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
+			if(vTotal<.01){
+				vx=0;
+				vy=0;
+				vTheta=0;
+			}
+
 			getRotationRates(rates,vx,vy,vTheta);
 
 			for(int i=0;i<4;i++){
