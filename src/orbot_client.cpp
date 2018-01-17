@@ -76,15 +76,15 @@ void messageCallbackTarget( geometry_msgs::TransformStamped t){
 		update=true;
 }
 
-void writeToPort(SerialPort ser, char* write){
+void writeToPort(SerialPort *ser, char* write){
 	bool written=false;
 	while(!written){
 		try{
-			ser.Write(write);
+			ser->Write(write);
 			written=true;
 		}
 		catch(std::exception& e){
-			continue();
+			continue;
 		}
 	}
 }
@@ -158,27 +158,27 @@ int main(int argc, char** argv){
 		char* write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
-		writeToPort(ser1,write);
+		writeToPort(&ser1,write);
 		std::cout<<"wrote "<<write<<"\n";
 			
 		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[1]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
-		writeToPort(ser1,write);
+		writeToPort(&ser1,write);
 		std::cout<<"wrote "<<write<<"\n";
 
 		len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[2]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
-		writeToPort(ser1,write);
+		writeToPort(&ser1,write);
 		std::cout<<"wrote "<<write<<"\n";
 
 		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[3]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
-		writeToPort(ser1,write);
+		writeToPort(&ser1,write);
 		write[len]='\0';
 		std::cout<<"wrote "<<write<<"\n";
 //		loop_rate.sleep();
