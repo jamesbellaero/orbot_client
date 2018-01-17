@@ -33,8 +33,14 @@ bool update;
 const float pi=3.14159265359;
 const float wMax=122*2*pi/60;
 const float vMax=.00762*wMax/1.424;// m/s
-
-
+const float P=2;
+const float I=0.2;
+const float D=1;
+int iteration;
+float errorIntX =0.0;
+float errorLastX = 0.0;
+float errorIntY =0.0;
+float errorLastY = 0.0;
 
 Vec3 tarLoc;
 Vec3 tarAtt;
@@ -120,10 +126,18 @@ int main(int argc, char** argv){
 	 	  vx=dx;
 	 	  vy=dy;
 	 	  vTheta=dTheta;
-			if(fabs(dx)>vMax/2)
-				vx=(dx>0?1:-1)*vMax/2*(fabs(dy)>fabs(dx)?fabs(dx/dy):1);
-			if(fabs(dy)>vMax/2)
-				vy=(dy>0?1:-1)*vMax/2*(fabs(dx)>fabs(dy)?fabs(dy/dx):1);
+			if(fabs(dx)>vMax/2){
+				//vx=(dx>0?1:-1)*vMax/2*(fabs(dy)>fabs(dx)?fabs(dx/dy):1);
+				errorIntX+=dx;
+				vx=P*dx + I*errorIntX +  D*(dx-errorLastX);
+				errorLastX = dx;
+			}
+			if(fabs(dy)>vMax/2){
+				//vy=(dy>0?1:-1)*vMax/2*(fabs(dx)>fabs(dy)?fabs(dy/dx):1);
+				errorIntY+=dy;
+				vy=P*dy + I*errorIntY + D*(dy-errorLastY);
+				errorLastY = dy;
+			}
 			if(fabs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
 				vTheta=0;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
 			getRotationRates(rates,vx,vy,vTheta);
