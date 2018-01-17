@@ -123,32 +123,33 @@ int main(int argc, char** argv){
 	 	  dx=dx0*cos(dTheta)-dy0*sin(dTheta);
 	 	  dy=dx0*sin(dTheta)+dy0*cos(dTheta);
 
-	 	  if(firstIter){
+	 	  if(firstIter && fabs(dx)>.00001){
 				errorLastX=dx;
 				errorLastY=dy;
 				firstIter=false;
 			}
 
 	 	  float vx,vy,vTheta;
-	 	  vx=dx;
-	 	  vy=dy;
-	 	  vTheta=dTheta;
-			if(fabs(dx)>vMax/2){
+	 	  //pid stuff here
+	 	  vx=P*dx + I*errorIntX +  D*(dx-errorLastX);
+			errorIntX+=dx;
+			errorLastX = dx;
+
+	 	  vy=P*dy + I*errorIntY + D*(dy-errorLastY);
+			errorIntY+=dy;
+			errorLastY = dy;
+
+	 	  vTheta=0;//dTheta
+			if(sqrt(pow(vx,2)+pow(vy,2))){
 				//vx=(dx>0?1:-1)*vMax/2*(fabs(dy)>fabs(dx)?fabs(dx/dy):1);
+				float vx0=vx;
+				float vy0=vy;
+				vx=vx0/sqrt(pow(vx,2)+pow(vy,2));
+				vy=vy0/sqrt(pow(vx,2)+pow(vy,2));
 				
-				vx=P*dx + I*errorIntX +  D*(dx-errorLastX);
-				errorIntX+=dx;
-				errorLastX = dx;
 			}
-			if(fabs(dy)>vMax/2){
-				//vy=(dy>0?1:-1)*vMax/2*(fabs(dx)>fabs(dy)?fabs(dy/dx):1);
-				
-				vy=P*dy + I*errorIntY + D*(dy-errorLastY);
-				errorIntY+=dy;
-				errorLastY = dy;
-			}
-			if(fabs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
-				vTheta=0;//P*dTheta;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
+			// if(fabs(dTheta)>vMax/.04)//.02 = (r_wheels x v_wheels)/v_wheels 
+			// 	vTheta=0;//P*dTheta;//(dTheta>0?1:-1)*vMax/.04; TODO: FIX THIS
 			getRotationRates(rates,vx,vy,vTheta);
 
 			for(int i=0;i<4;i++){
