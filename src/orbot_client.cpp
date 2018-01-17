@@ -33,7 +33,7 @@ bool update;
 const float pi=3.14159265359;
 const float wMax=122*2*pi/60;
 const float vMax=.00762*wMax/1.424;// m/s
-const float P=2;
+const float P=.25;
 const float I=0.2;
 const float D=1;
 int iteration;
