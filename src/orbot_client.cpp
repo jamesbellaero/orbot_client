@@ -76,7 +76,6 @@ void messageCallbackTarget( geometry_msgs::TransformStamped t){
 		update=true;
 }
 
-
 void writeToPort(SerialPort *ser, char* write){
 	bool written=false;
 	while(!written){
@@ -114,7 +113,7 @@ int main(int argc, char** argv){
 		//divide all by 2 for right now	
 		if(update){
 			update=false;
-			std::cout<<"Updating orbot\n";//TODO: preserve ratios
+			std::cout<<"Updating orbot\n";
 
 			//determine delta
 			float dx0 = (float)(tarLoc.v[0] - loc.v[0]);
@@ -123,7 +122,7 @@ int main(int argc, char** argv){
 	 	  //rotate from global to local reference
 	 	  dx=dx0*cos(dTheta)-dy0*sin(dTheta);
 	 	  dy=dx0*sin(dTheta)+dy0*cos(dTheta);
-			 
+
 	 	  if(firstIter && fabs(dx)>.00001){
 				errorLastX=dx;
 				errorLastY=dy;
@@ -136,11 +135,11 @@ int main(int argc, char** argv){
 			errorIntX+=dx;
 			errorLastX = dx;
 
+			//TODO: MAKE THIS NON-NEGATIVE P
 	 	  vy=-P*dy ;//+ I*errorIntY + D*(dy-errorLastY);
 			errorIntY+=dy;
 			errorLastY = dy;
 
-<<<<<<< HEAD
 	 	  float wTheta=P*dTheta;//dTheta
 	 	  vTheta=wTheta*.04;
 	 	  float vTotal=sqrt(pow(vx,2)+pow(vy,2)+pow(vTheta,2));
@@ -150,18 +149,6 @@ int main(int argc, char** argv){
 				vTheta*=vMax/1.5/vTotal;
 			}
 			if(vTotal<.01){
-=======
-	 	  vTheta=0;//dTheta
-			if(sqrt(pow(vx,2)+pow(vy,2))>vMax/2){
-				//vx=(dx>0?1:-1)*vMax/2*(fabs(dy)>fabs(dx)?fabs(dx/dy):1);
-				float vx0=vx;
-				float vy0=vy;
-				vx=vx0/sqrt(pow(vx0,2)+pow(vy0,2))*vMax/2;
-				vy=vy0/sqrt(pow(vx0,2)+pow(vy0,2))*vMax/2;
-					
-			}
-			if(sqrt(pow(vx,2)+pow(vy,2))<.01){
->>>>>>> af9d8f6f2eec82ef728373fa6a203de8609f91ba
 				vx=0;
 				vy=0;
 				vTheta=0;
@@ -179,6 +166,7 @@ int main(int argc, char** argv){
 			}
 		}
 		std::cout<<"Deltas are: "<<dx<<"\t"<<dy<<"\t"<<dTheta<<"\n";
+		//TODO: make this more straightforward
 		char output_buffer[64];
 		int len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[0]);
 		char* write =(char*) malloc(len+1);
