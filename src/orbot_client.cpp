@@ -33,9 +33,9 @@ bool update;
 //constants for PID's, etc
 const float pi=3.14159265359;
 const float wMax=122*2*pi/60;
-const float vMax=.00762*wMax/1.424;// m/s
-const float P=.25;
-const float I=0.2;
+const float vMax=.00762*wMax;// m/s
+const float P=.2;
+const float I=0.01;
 const float D=1;
 const float minDelta=.01;//minimum distance before moving
 
@@ -131,27 +131,27 @@ int main(int argc, char** argv){
 
 	 	  float vx,vy,vTheta;
 	 	  //pid stuff here
-	 	  vx=P*dx;//+ I*errorIntX +  D*(dx-errorLastX);
-			errorIntX+=dx;
+	 	  vx=P*dx+ I*errorIntX +  D*(dx-errorLastX);
+			errorIntX+=fabs(errorIntX+dx)>fabs(errorIntX)&&fabs(errorIntX+dx)>P*dx/I?0:dx;//don't increment if too high already
 			errorLastX = dx;
 
 			//TODO: MAKE THIS NON-NEGATIVE P
-	 	  vy=-P*dy ;//+ I*errorIntY + D*(dy-errorLastY);
-			errorIntY+=dy;
+	 	  vy=-(P*dy+ I*errorIntY + D*(dy-errorLastY));
+			errorIntY+=fabs(errorIntY+dy)>fabs(errorIntY)&&fabs(errorIntY+dy)>P*dy/I?0:dy;
 			errorLastY = dy;
 
-	 	  float wTheta=P*dTheta;//dTheta
-	 	  vTheta=wTheta*.04;
+	 	  vTheta=dTheta;
 	 	  float vTotal=sqrt(pow(vx,2)+pow(vy,2)+pow(vTheta,2));
-			if(vTotal>vMax/1.5){//normalize by maximum velocity
-				vx*=vMax/1.5/vTotal;
-				vy*=vMax/1.5/vTotal;
-				vTheta*=vMax/1.5/vTotal;
+			if(vTotal>vMax){//normalize by maximum velocity
+				vx*=vMax/vTotal;
+				vy*=vMax/vTotal;
+				vTheta*=vMax/vTotal;
 			}
-			if(vTotal<.01){
+			if(sqrt(pow(dx0,2)+pow(dy0,2)+pow(dTheta,2))<.05){
 				vx=0;
 				vy=0;
 				vTheta=0;
+				firstIter=true;
 			}
 
 			getRotationRates(rates,vx,vy,vTheta);
