@@ -10,7 +10,7 @@ Reference: http://research.ijcaonline.org/volume113/number3/pxc3901586.pdf
 #include <stdint.h>
 void getRotationRates(float* rates, float vx,float vy, float vTheta, float x_cm, float y_cm, float length, float width, float radius){
 	const float pi=3.14159265359;
-	radius=.00762;	
+	radius=.0762;	
 	float wheel_locs[2][4];
 	for(uint8_t i=0;i<4;i++){
 		wheel_locs[0][i]=((i&2)>0?-length/2:length/2)-x_cm;//hardcoding is for pussies

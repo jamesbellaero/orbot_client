@@ -190,9 +190,9 @@ int main(int argc, char** argv){
 				vTheta=0;
 				firstIter=true;
 			}
-
+			std::cout<<"Velocities are: "<<vx<<"\t"<<vy<<"\t"<<vTheta<<"\n";
 			getRotationRates(rates,vx,vy,vTheta);
-
+			std::cout<<"Rates are: "<<rates[0]<<"\t"<<rates[1]<<"\t"<<rates[2]<<"\t"<<rates[3]<<"\n";
 			for(int i=0;i<4;i++){
 				rates[i]=rates[i]/pi/2*60;
 				if(rates[i]>120)
