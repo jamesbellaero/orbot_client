@@ -16,6 +16,7 @@ NOTES:
 Last edited by James Bell on 1/9/18
 */
 #include <ros/ros.h>
+#include <time.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/TransformStamped.h>
 #include "quaternion.h"
@@ -88,6 +89,24 @@ void writeToPort(SerialPort *ser, char* write){
 		}
 	}
 }
+void writeDeltas(SerialPort *ser1, SerialPort *ser2, float *rates){
+		
+		//TODO: make this more straightforward
+		char output_buffer[64];
+		int len=sprintf(output_buffer,"!g 1 %d\r!g 2 %d\r",(int)rates[0],(int)rates[1]);
+		char* write =(char*) malloc(len+1);
+		strncpy(write,output_buffer,len);
+		write[len]='\0';
+		writeToPort(ser1,write);
+		std::cout<<"wrote "<<write<<"\n";
+
+		len=sprintf(output_buffer,"!g 1 %d\r!g 2 %d\r",(int)rates[2],(int)rates[3]);
+		write =(char*) malloc(len+1);
+		strncpy(write,output_buffer,len);
+		write[len]='\0';
+		writeToPort(ser2,write);
+		std::cout<<"wrote "<<write<<"\n";
+}
 
 int main(int argc, char** argv){
 	ros::init(argc,argv,"orbot_client");
@@ -108,11 +127,15 @@ int main(int argc, char** argv){
 	ros::Rate loop_rate(10);//TODO: spiit up the updating and writing rates with time class
 	float rates[4];
 	float dx,dy,dTheta;
+	ros::Time prevWrite=ros::Time::now();
+	ros::Duration writeDelay(.8);
 	while(ros::ok()){
 		//convert delta positions to velocities somehow
 		//divide all by 2 for right now	
+		bool write=false;
 		if(update){
 			update=false;
+			write=true;
 			std::cout<<"Updating orbot\n";
 
 			//determine delta
@@ -165,36 +188,13 @@ int main(int argc, char** argv){
 				rates[i]=round(rates[i]/122*1000);
 			}
 		}
-		std::cout<<"Deltas are: "<<dx<<"\t"<<dy<<"\t"<<dTheta<<"\n";
-		//TODO: make this more straightforward
-		char output_buffer[64];
-		int len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[0]);
-		char* write =(char*) malloc(len+1);
-		strncpy(write,output_buffer,len);
-		write[len]='\0';
-		writeToPort(&ser1,write);
-		std::cout<<"wrote "<<write<<"\n";
-			
-		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[1]);
-		write =(char*) malloc(len+1);
-		strncpy(write,output_buffer,len);
-		write[len]='\0';
-		writeToPort(&ser1,write);
-		std::cout<<"wrote "<<write<<"\n";
-
-		len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[2]);
-		write =(char*) malloc(len+1);
-		strncpy(write,output_buffer,len);
-		write[len]='\0';
-		writeToPort(&ser2,write);
-		std::cout<<"wrote "<<write<<"\n";
-
-		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[3]);
-		write =(char*) malloc(len+1);
-		strncpy(write,output_buffer,len);
-		writeToPort(&ser2,write);
-		write[len]='\0';
-		std::cout<<"wrote "<<write<<"\n";
+		if(write || ros::Time::now()-prevWrite>writeDelay){
+			std::cout<<"Deltas are: "<<dx<<"\t"<<dy<<"\t"<<dTheta<<"\n";
+			write=false;
+			writeDeltas(&ser1,&ser2,rates);
+			prevWrite=ros::Time::now();
+		}
+		
 //		loop_rate.sleep();
 		ros::spinOnce();
 		loop_rate.sleep();		
