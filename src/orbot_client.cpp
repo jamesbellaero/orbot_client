@@ -93,14 +93,28 @@ void writeDeltas(SerialPort *ser1, SerialPort *ser2, float *rates){
 		
 		//TODO: make this more straightforward
 		char output_buffer[64];
-		int len=sprintf(output_buffer,"!g 1 %d\r!g 2 %d\r",(int)rates[0],(int)rates[1]);
+		int len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[0],(int)rates[1]);
 		char* write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
 		writeToPort(ser1,write);
 		std::cout<<"wrote "<<write<<"\n";
 
-		len=sprintf(output_buffer,"!g 1 %d\r!g 2 %d\r",(int)rates[2],(int)rates[3]);
+		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[1]);
+		write =(char*) malloc(len+1);
+		strncpy(write,output_buffer,len);
+		write[len]='\0';
+		writeToPort(ser2,write);
+		std::cout<<"wrote "<<write<<"\n";
+
+		len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[2]);
+		write =(char*) malloc(len+1);
+		strncpy(write,output_buffer,len);
+		write[len]='\0';
+		writeToPort(ser2,write);
+		std::cout<<"wrote "<<write<<"\n";
+
+		len=sprintf(output_buffer,"!g 2 %d\r",(int)rates[3]);
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
