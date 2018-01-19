@@ -34,9 +34,9 @@ bool update;
 //constants for PID's, etc
 const float pi=3.14159265359;
 const float wMax=122*2*pi/60;
-const float vMax=.00762*wMax/1.424;// m/s
-const float P=.2;
-const float I=0.005;
+const float vMax=.0762*wMax/1.424;// m/s
+const float P=2;
+const float I=0.01;
 const float D=1;
 const float minDelta=.01;//minimum distance before moving
 
