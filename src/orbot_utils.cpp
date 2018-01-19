@@ -22,9 +22,11 @@ void getRotationRates(float* rates, float vx,float vy, float vTheta, float x_cm,
 		float b=(((i&2)>>1)^(i&1))>0?-pi/2:pi/2;
 		float c=i&1>0?-pi/4:pi/4;
 		float l=sqrt(wheel_locs[0][i]*wheel_locs[0][i]+wheel_locs[1][i]*wheel_locs[1][i]);
-		rates[i]=vx/radius*cos(b-c)/sin(c);
-		rates[i]-=vy/radius*sin(b-c)/sin(c);
-		rates[i]-=vTheta/radius*l*sin(b-c+a)/sin(c);
+		float r1,r2,r3;
+		r1=vx/radius*cos(b-c)/sin(c);
+		r2-=vy/radius*sin(b-c)/sin(c);
+		r3-=vTheta/radius*l*sin(b-c+a)/sin(c);
+		rates[i]=r1+r2+r3;
 	}
 
 }
