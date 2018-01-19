@@ -104,7 +104,7 @@ void writeDeltas(SerialPort *ser1, SerialPort *ser2, float *rates){
 		write =(char*) malloc(len+1);
 		strncpy(write,output_buffer,len);
 		write[len]='\0';
-		writeToPort(ser2,write);
+		writeToPort(ser1,write);
 		std::cout<<"wrote "<<write<<"\n";
 
 		len=sprintf(output_buffer,"!g 1 %d\r",(int)rates[2]);
