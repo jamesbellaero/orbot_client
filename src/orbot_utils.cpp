@@ -28,5 +28,4 @@ void getRotationRates(float* rates, float vx,float vy, float vTheta, float x_cm,
 		r3-=vTheta/radius*l*sin(b-c+a)/sin(c);
 		rates[i]=r1+r2+r3;
 	}
-
 }
