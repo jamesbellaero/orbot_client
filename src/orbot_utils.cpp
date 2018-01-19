@@ -18,9 +18,9 @@ void getRotationRates(float* rates, float vx,float vy, float vTheta, float x_cm,
 	}
 
 	for(uint8_t i=0;i<4;i++){
-		float a=atan2(wheel_locs[1][i],wheel_locs[0][i]);//about pi/4 or -pi/4
-		float b=(((i&2)>>1)^(i&1))>0?-pi/2:pi/2;
-		float c=i&1>0?-pi/4:pi/4;
+		float a=atan2(wheel_locs[1][i],wheel_locs[0][i]);//
+		float b=(((i&2)>>1)^(i&1))>0?-pi/2:pi/2;//wheels 2,3 run backwards
+		float c=i&1>0?-pi/4:pi/4;//wheels 2,4 move bot in negative y-direction
 		float l=sqrt(wheel_locs[0][i]*wheel_locs[0][i]+wheel_locs[1][i]*wheel_locs[1][i]);
 		float r1,r2,r3;
 		r1=vx/radius*cos(b-c)/sin(c);
