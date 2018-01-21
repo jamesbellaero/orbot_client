@@ -179,10 +179,10 @@ int main(int argc, char** argv){
 
 	 	  vTheta=dTheta;
 	 	  float vTotal=sqrt(pow(vx,2)+pow(vy,2)+pow(vTheta,2));
-			if(vTotal>vMax){//normalize by maximum velocity
-				vx*=vMax/vTotal;
-				vy*=vMax/vTotal;
-				vTheta*=vMax/vTotal;
+			if(vTotal>vMax/1.5){//normalize by maximum velocity
+				vx*=vMax/1.5/vTotal;
+				vy*=vMax/1.5/vTotal;
+				vTheta*=vMax/1.5/vTotal;
 			}
 			if(sqrt(pow(dx0,2)+pow(dy0,2)+pow(dTheta,2))<.05){
 				vx=0;
