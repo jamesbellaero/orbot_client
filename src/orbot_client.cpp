@@ -36,8 +36,8 @@ const float pi=3.14159265359;
 const float wMax=122*2*pi/60;
 const float vMax=.0762*wMax/1.424;// m/s
 const float P=2;
-const float I=0.01;
-const float D=1;
+const float I=.01;//0.01;
+const float D=0;//1;
 const float minDelta=.01;//minimum distance before moving
 
 float errorIntX,errorLastX,errorIntY,errorLastY;
@@ -177,7 +177,7 @@ int main(int argc, char** argv){
 			errorIntY+=fabs(errorIntY+dy)>fabs(errorIntY)&&fabs(errorIntY+dy)>P*dy/I?0:dy;
 			errorLastY = dy;
 
-	 	  vTheta=dTheta;
+	 	  vTheta=P*dTheta+I*errorIntTheta+D*(dTheta-errorLastTheta);
 	 	  float vTotal=sqrt(pow(vx,2)+pow(vy,2)+pow(vTheta,2));
 			if(vTotal>vMax/1.5){//normalize by maximum velocity
 				vx*=vMax/1.5/vTotal;
