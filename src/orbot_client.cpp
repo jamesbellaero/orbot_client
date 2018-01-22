@@ -163,25 +163,26 @@ int main(int argc, char** argv){
 	 	  if(firstIter && fabs(dx)>.00001){
 				eLastX=dx;
 				eLastY=dy;
-				eLastTheta=dTheta
+				eLastTheta=dTheta;
 				firstIter=false;
 			}
 
 	 	  float vx,vy,vTheta;
 	 	  //pid stuff here
-	 	  vx=P*dx+ I*eIntX +  D*(dx-eLastX);
-			eIntX+=fabs(eIntX+dx)>fabs(eIntX)&&fabs(eIntX+dx)>P*dx/I?0:dx;//don't increment if too high already
+	 	  vx=P*dx+ I*eIntX +  (D)*(dx-eLastX);
+			eIntX+=fabs(eIntX+dx)>fabs(eIntX)&&fabs(eIntX+dx)>fabs(P*dx/I)?0:dx;//don't increment if too high already
 			eLastX = dx;
 
 			//TODO: MAKE THIS NON-NEGATIVE P
-	 	  vy=-(P*dy+ I*eIntY + D*(dy-eLastY));
-			eIntY+=fabs(eIntY+dy)>fabs(eIntY)&&fabs(eIntY+dy)>P*dy/I?0:dy;
+	 	  vy=-(P*dy+ I*eIntY + (D)*(dy-eLastY));
+			eIntY+=fabs(eIntY+dy)>fabs(eIntY)&&fabs(eIntY+dy)>fabs(P*dy/I)?0:dy;
 			eLastY = dy;
-
-	 	  vTheta=P*dTheta+I*eIntTheta+D*(dTheta-eLastTheta);
-	 	  eIntTheta+=fabs(eIntTheta+dTheta)>fabs(eIntTheta)&&fabs(eIntTheta+dTheta)>P*dTheta/I?0:dTheta;
+			
+	 	  vTheta=P*10*dTheta+I*eIntTheta+(D)*(dTheta-eLastTheta);
+	 	  eIntTheta+=fabs(eIntTheta+dTheta)>fabs(eIntTheta)&&fabs(eIntTheta+dTheta)>fabs(P*dTheta/I)?0:dTheta;
 	 	  eLastTheta = dTheta;
-
+			//if(fabs(dTheta)<.01)
+			vTheta=0;
 	 	  float vTotal=sqrt(pow(vx,2)+pow(vy,2)+pow(vTheta,2));
 			if(vTotal>vMax/1.5){//normalize by maximum velocity
 				vx*=vMax/1.5/vTotal;
