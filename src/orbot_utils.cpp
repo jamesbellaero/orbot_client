@@ -13,8 +13,6 @@ void getRotationRates(float* rates, float vx,float vy, float vTheta, float x_cm,
 	radius=.0762;	
 	float wheel_locs[2][4];
 
-
-
 	for(uint8_t i=0;i<4;i++){
 		wheel_locs[0][i]=((i&2)>0?-length/2:length/2)-x_cm;//hardcoding is for pussies
 		wheel_locs[1][i]=(((i&2)>>1)^(i&1)>0?-width/2:width/2)-y_cm;

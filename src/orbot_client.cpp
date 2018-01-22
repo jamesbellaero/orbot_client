@@ -40,7 +40,7 @@ const float I=.01;//0.01;
 const float D=0;//1;
 const float minDelta=.01;//minimum distance before moving
 
-float errorIntX,errorLastX,errorIntY,errorLastY;
+float eIntX,eLastX,eIntY,eLastY,eLastTheta,eIntTheta;
 
 Vec3 tarLoc;
 Vec3 tarAtt;
@@ -161,23 +161,27 @@ int main(int argc, char** argv){
 	 	  dy=dx0*sin(dTheta)+dy0*cos(dTheta);
 
 	 	  if(firstIter && fabs(dx)>.00001){
-				errorLastX=dx;
-				errorLastY=dy;
+				eLastX=dx;
+				eLastY=dy;
+				eLastTheta=dTheta
 				firstIter=false;
 			}
 
 	 	  float vx,vy,vTheta;
 	 	  //pid stuff here
-	 	  vx=P*dx+ I*errorIntX +  D*(dx-errorLastX);
-			errorIntX+=fabs(errorIntX+dx)>fabs(errorIntX)&&fabs(errorIntX+dx)>P*dx/I?0:dx;//don't increment if too high already
-			errorLastX = dx;
+	 	  vx=P*dx+ I*eIntX +  D*(dx-eLastX);
+			eIntX+=fabs(eIntX+dx)>fabs(eIntX)&&fabs(eIntX+dx)>P*dx/I?0:dx;//don't increment if too high already
+			eLastX = dx;
 
 			//TODO: MAKE THIS NON-NEGATIVE P
-	 	  vy=-(P*dy+ I*errorIntY + D*(dy-errorLastY));
-			errorIntY+=fabs(errorIntY+dy)>fabs(errorIntY)&&fabs(errorIntY+dy)>P*dy/I?0:dy;
-			errorLastY = dy;
+	 	  vy=-(P*dy+ I*eIntY + D*(dy-eLastY));
+			eIntY+=fabs(eIntY+dy)>fabs(eIntY)&&fabs(eIntY+dy)>P*dy/I?0:dy;
+			eLastY = dy;
 
-	 	  vTheta=P*dTheta+I*errorIntTheta+D*(dTheta-errorLastTheta);
+	 	  vTheta=P*dTheta+I*eIntTheta+D*(dTheta-eLastTheta);
+	 	  eIntTheta+=fabs(eIntTheta+dTheta)>fabs(eIntTheta)&&fabs(eIntTheta+dTheta)>P*dTheta/I?0:dTheta;
+	 	  eLastTheta = dTheta;
+
 	 	  float vTotal=sqrt(pow(vx,2)+pow(vy,2)+pow(vTheta,2));
 			if(vTotal>vMax/1.5){//normalize by maximum velocity
 				vx*=vMax/1.5/vTotal;
@@ -190,7 +194,7 @@ int main(int argc, char** argv){
 				vTheta=0;
 				firstIter=true;
 			}
-			std::cout<<"Velocities are: "<<vx<<"\t"<<vy<<"\t"<<vTheta<<"\n";
+			std::cout<<"Velocities are: "<<vx<<"\t"<<vy<<"\t"<<vTheta<<"\n"<<"With errors: "<<eIntX<<"\t"<<eIntY<<"\t"<<eIntTheta<<"\n";
 			getRotationRates(rates,vx,vy,vTheta);
 			std::cout<<"Rates are: "<<rates[0]<<"\t"<<rates[1]<<"\t"<<rates[2]<<"\t"<<rates[3]<<"\n";
 			for(int i=0;i<4;i++){
