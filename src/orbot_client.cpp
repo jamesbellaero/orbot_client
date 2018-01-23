@@ -10,10 +10,10 @@ int 	main(int, char**)
 	Starts the subscribers and publisher, publishes delta between target and current pose to the /orbot_server/orbot_delta
 
 NOTES:
-	Would like to move this functionality into the orbot client eventually, since the client should be able to subscribe
-	to both on its own. Only currently using this for debugging/separation of tasks
-
-Last edited by James Bell on 1/9/18
+	1. 	Could try and ensure rotation is mostly taken care of by the time that the bot reaches within a certain radius of its goal, 
+		then fix rotation and translation separately until it converges. This involves giving rotation a superficially large priority based
+		on distance to the goal (pretty much a multiplier, just need to ensure it's less than 42/14 times y at all times).
+	2.	Could also attempt to have it run regularly until it's less than .5 meters out then go to translation and rotation separately
 */
 #include <ros/ros.h>
 #include <time.h>
@@ -128,6 +128,7 @@ int main(int argc, char** argv){
 	viconSub=nh.subscribe("/vicon/orbot/orbot",1000,messageCallbackVicon);
 	targetSub=nh.subscribe("/orbot_client/target",1000,messageCallbackTarget);
 	bool firstIter=true;
+	bool translate=true;//when false, rotate
 	update=true;
 
 	SerialPort ser1("/dev/ttyACM0");
@@ -156,6 +157,7 @@ int main(int argc, char** argv){
 			float dx0 = (float)(tarLoc.v[0] - loc.v[0]);
 	 	  float dy0 = (float)(tarLoc.v[1] - loc.v[1]);
 	 	  dTheta  = (float)(tarAtt.v[2] - att.v[2]);
+
 	 	  //rotate from global to local reference
 	 	  dx=dx0*cos(dTheta)-dy0*sin(dTheta);
 	 	  dy=dx0*sin(dTheta)+dy0*cos(dTheta);
@@ -164,30 +166,48 @@ int main(int argc, char** argv){
 				eLastX=dx;
 				eLastY=dy;
 				eLastTheta=dTheta;
+				translate=true;
 				firstIter=false;
 			}
 
 	 	  float vx,vy,vTheta;
 	 	  //pid stuff here
-	 	  vx=P*dx+ I*eIntX +  (D)*(dx-eLastX);
-			eIntX+=fabs(eIntX+dx)>fabs(eIntX)&&fabs(eIntX+dx)>fabs(P*dx/I)?0:dx;//don't increment if too high already
-			eLastX = dx;
+			if(translate){
+				vx=P*dx+ I*eIntX +  (D)*(dx-eLastX);
+				eIntX+=fabs(eIntX+dx)>fabs(eIntX)&&fabs(eIntX+dx)>fabs(P*dx/I)?0:dx;//don't increment if too high already
+				eLastX = dx;
 
-			//TODO: MAKE THIS NON-NEGATIVE P
-	 	  vy=-(P*dy+ I*eIntY + (D)*(dy-eLastY));
-			eIntY+=fabs(eIntY+dy)>fabs(eIntY)&&fabs(eIntY+dy)>fabs(P*dy/I)?0:dy;
-			eLastY = dy;
+				//TODO: MAKE THIS NON-NEGATIVE P
+				vy=-(P*dy+ I*eIntY + (D)*(dy-eLastY));
+				eIntY+=fabs(eIntY+dy)>fabs(eIntY)&&fabs(eIntY+dy)>fabs(P*dy/I)?0:dy;
+				eLastY = dy;
+			}
+			else{
+				vTheta=P*dTheta+I*eIntTheta+(D)*(dTheta-eLastTheta);
+				eIntTheta+=fabs(eIntTheta+dTheta)>fabs(eIntTheta)&&fabs(eIntTheta+dTheta)>fabs(P*dTheta/I)?0:dTheta;
+				eLastTheta = dTheta;
+			}
 			
-	 	  vTheta=P*10*dTheta+I*eIntTheta+(D)*(dTheta-eLastTheta);
-	 	  eIntTheta+=fabs(eIntTheta+dTheta)>fabs(eIntTheta)&&fabs(eIntTheta+dTheta)>fabs(P*dTheta/I)?0:dTheta;
-	 	  eLastTheta = dTheta;
-			//if(fabs(dTheta)<.01)
-			vTheta=0;
 	 	  float vTotal=sqrt(pow(vx,2)+pow(vy,2)+pow(vTheta,2));
 			if(vTotal>vMax/1.5){//normalize by maximum velocity
 				vx*=vMax/1.5/vTotal;
 				vy*=vMax/1.5/vTotal;
 				vTheta*=vMax/1.5/vTotal;
+			}
+			if(translate&&sqrt(pow(dx0,2)+pow(dy0,2))<.05){
+				vx=0;
+				vy=0;
+				eIntX=0;
+				eIntY=0;
+				eLastTheta=dTheta;
+				translate=false;
+			}
+			if(!translate&&fabs(dTheta)<.01){
+				vTheta=0;
+				eIntTheta=0;
+				eLastX=dx;
+				eLastY=dy;
+				translate=true;
 			}
 			if(sqrt(pow(dx0,2)+pow(dy0,2)+pow(dTheta,2))<.05){
 				vx=0;

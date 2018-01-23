@@ -1,6 +1,4 @@
 /*
-Last edited by James Bell on 1/8/18
-
 Returns the rotation rate in rad/s for each wheel in a column vector on a mechanum robot
 Count wheels from front left, moving clockwise around the robot
 Assume rollers are pointing away from the bot.
@@ -30,3 +28,8 @@ void getRotationRates(float* rates, float vx,float vy, float vTheta, float x_cm,
 		rates[i]=r1+r2+r3;
 	}
 }
+
+
+
+
+
