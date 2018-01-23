@@ -10,11 +10,12 @@ int 	main(int, char**)
 	Starts the subscribers and publisher, publishes delta between target and current pose to the /orbot_server/orbot_delta
 
 NOTES:
-	Would like to move this functionality into the orbot client eventually, since the client should be able to subscribe
-	to both on its own. Only currently using this for debugging/separation of tasks
-
-Last edited by James Bell on 1/9/18
-*/
+	
+	1. 	Could try and ensure rotation is mostly taken care of by the time that the bot reaches within a certain radius of its goal, 
+		then fix rotation and translation separately until it converges. This involves giving rotation a superficially large priority based
+		on distance to the goal (pretty much a multiplier, just need to ensure it's less than 42/14 times y at all times).
+	2.	Could also attempt to have it run regularly until it's less than .5 meters out then go to translation and rotation separately
+	*/
 #include <ros/ros.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/TransformStamped.h>

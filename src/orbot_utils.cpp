@@ -1,6 +1,4 @@
 /*
-Last edited by James Bell on 1/8/18
-
 Returns the rotation rate in rad/s for each wheel in a column vector on a mechanum robot
 Count wheels from front left, moving clockwise around the robot
 Assume rollers are pointing away from the bot.
