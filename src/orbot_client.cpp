@@ -162,7 +162,7 @@ int main(int argc, char** argv){
 	 	  dx=dx0*cos(dTheta)-dy0*sin(dTheta);
 	 	  dy=dx0*sin(dTheta)+dy0*cos(dTheta);
 
-	 	  if(firstIter && fabs(dx)>.00001){
+	 	  if(firstIter && fabs(dx+dy+dTheta)>.00001){
 				eLastX=dx;
 				eLastY=dy;
 				eLastTheta=dTheta;
