@@ -44,12 +44,14 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>time</build_depend>
+  <build_depend>robot_controller</build_depend>
+  <build_depend>kinova_driver</build_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>time</run_depend>
   <run_depend>eigen</run_depend>
-  <build_depend>kinova_driver</build_depend>
+  <run_depend>robot_controller</run_depend>
   <run_depend>kinova_driver</run_depend>
 
 

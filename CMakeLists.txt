@@ -20,7 +20,10 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   kinova_driver
 )
-catkin_package()
+catkin_package(CATKIN_DEPENDS
+  roscpp
+  robot_controller
+)
 include_directories(
 ${catkin_INCLUDE_DIRS}
 )

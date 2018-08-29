@@ -34,10 +34,10 @@ NOTES:
 #include "eigen3/Eigen/Dense"
 
 using namespace kinova;
-ros::Subscriber viconSub,targetSub;
+ros::Subscriber viconSub,targetSub,stateSub;
 bool update;
 //constants for PID's, etc
-const float pi=3.14159265359;
+const float pi=3.14159265358979;
 const float wMax=122*2*pi/60;
 const float vMax=.0762*wMax/1.424;// m/s
 const float P=2;
@@ -119,21 +119,33 @@ double yrdotdot(double t)
 }
 */
 void messageCallbackVicon( geometry_msgs::TransformStamped t){
-  std::string a =  t.header.frame_id;//currently unused
+  // std::string a =  t.header.frame_id;//currently unused
+  // //defined in quaternion.h		
+  // Vec4 quat;
+  // loc.v[0] = t.transform.translation.x;
+  // loc.v[1] = t.transform.translation.y;
+  // loc.v[2] = t.transform.translation.z;
+  // quat.v[0] = t.transform.rotation.w;
+  // quat.v[1] = t.transform.rotation.x;
+  // quat.v[2] = t.transform.rotation.y;
+  // quat.v[3] = t.transform.rotation.z;
+  // att = Quat2RPY(quat);
+  // if(!update)
+  // 	update=true;
+}
+
+void messageCallbackState( robot_controller::State msg){
   //defined in quaternion.h		
   Vec4 quat;
-  loc.v[0] = t.transform.translation.x;
-  loc.v[1] = t.transform.translation.y;
-  loc.v[2] = t.transform.translation.z;
-  quat.v[0] = t.transform.rotation.w;
-  quat.v[1] = t.transform.rotation.x;
-  quat.v[2] = t.transform.rotation.y;
-  quat.v[3] = t.transform.rotation.z;
+	for(int i=0;i<3;i++){
+		loc.v[i]=msg.r[i];
+		quat.v[i+1]=msg.q[i];
+	}
+	quat.v[0]=msg.q[3];
   att = Quat2RPY(quat);
   if(!update)
   	update=true;
 }
-
 
 void writeToPort(SerialPort *ser, char* write){
 	bool written=false;
@@ -184,8 +196,9 @@ int main(int argc, char** argv){
 
 	ros::init(argc,argv,"orbot_client");
 	ros::NodeHandle nh;
-	
+	robotName = nh.getParam("RobotName",robotName);
 	viconSub=nh.subscribe("/vicon/Orbot/Orbot",1000,messageCallbackVicon);
+	stateSub=nh.subscribe(robotName+std::string("/state"),1000,messageCallbackState);
 	//targetSub=nh.subscribe("/orbot_client/target",1000,messageCallbackTarget);
 	bool firstIter=true;
 	bool translate=true;//when false, rotate
